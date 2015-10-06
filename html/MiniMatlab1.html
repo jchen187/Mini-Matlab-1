@@ -1,0 +1,529 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>MiniMatlab1</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-09-24"><meta name="DC.source" content="MiniMatlab1.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput">close <span class="string">all</span>;
+clear <span class="string">all</span>;
+clc;
+
+<span class="comment">%%Part 1 - Binomial Random Variables</span>
+
+N = 1;    <span class="comment">%number of trials</span>
+p = 0.5;  <span class="comment">%probability of success</span>
+n = 1;
+m = 1000;
+
+<span class="comment">%MSE will take in the square errors from each iteration and find the</span>
+<span class="comment">%average</span>
+mseML = zeros(n,m);
+mseCP = zeros(n,m);
+iterations = 100;
+
+<span class="comment">%hyperparameters if a and b are both 0, cp would work the same as ml</span>
+<span class="comment">%Good Guess</span>
+a = 3;
+b = 3;
+<span class="comment">%{
+</span><span class="comment">Bad Guess
+</span><span class="comment">a = 10
+</span><span class="comment">b = 3
+</span><span class="comment">%}
+</span>
+x=0:0.01:1;
+prior = betapdf(x,a,b);
+figure
+plot(prior)
+title(<span class="string">'Binomial Conjugate Prior'</span>);
+ylabel(<span class="string">'Likelihood'</span>);
+xlabel(<span class="string">'Number of Measurements'</span>);
+
+<span class="keyword">for</span> i = 1:iterations
+    <span class="comment">%generate random variables from binomial distribution.</span>
+    z = binornd(N,p,[n,m]);
+    <span class="comment">%create variable to count number of ones</span>
+    num1 = 0;
+    <span class="comment">%create empty arrays that would give the mean of the numbers until the current</span>
+    <span class="comment">%number(for ML) or the mean using the formula(for CP)</span>
+    <span class="comment">%indexj 1 2  3   4  5</span>
+    <span class="comment">%     z 0 0  1   1  0</span>
+    <span class="comment">% avgML 0 0 .33 .5 .4</span>
+    avgML = ones(n,m);
+    avgCP = ones(n,m);
+    <span class="keyword">for</span> j = 1:m
+        <span class="comment">%See if the number is a one</span>
+        <span class="keyword">if</span> z(j) == 1
+            num1 = num1 + 1;
+        <span class="keyword">end</span>
+        <span class="comment">%Maximum Likelihood</span>
+        <span class="keyword">if</span> j ~= 1
+            avgML(j) = (avgML(j-1)*(j-1)+z(j))/j;
+        <span class="keyword">else</span>
+            avgML(j) = z(j);
+        <span class="keyword">end</span>
+        <span class="comment">%THIS IS A FASTER WAY BUT I FIGURED IT OUT LATER</span>
+        <span class="comment">%avgML(j) = mean(z(1:j));</span>
+        <span class="comment">%Conjugate Prior</span>
+        avgCP(j) = (num1+a)/(j+a+b);
+    <span class="keyword">end</span>
+    <span class="comment">%create an array that keeps track of the square of the difference</span>
+    <span class="keyword">...</span><span class="comment">of each element and the real average. the average should get close to the real average</span>
+    seML = (N*p-avgML).^2; <span class="comment">%.^ takes each element from avgML and squares it. without the '.' , the matrix would multiply itself</span>
+    mseML = mseML + seML;
+
+    seCP = (N*p-avgCP).^2;
+    mseCP = mseCP + seCP;
+<span class="keyword">end</span>
+
+<span class="comment">%divide each element by the number of iterations to get the mean square</span>
+<span class="comment">%error</span>
+mseML = mseML./iterations;
+mseCP = mseCP./iterations;
+
+<span class="comment">%Integrate the plotting posteriors into the for loop</span>
+figure
+x=0:1:100;
+posterior1 = prior.*binopdf(x,100,avgCP(1));
+plot(posterior1)
+title(<span class="string">'Binomial Posterior After 1 Sample'</span>);
+ylabel(<span class="string">'Likelihood'</span>);
+xlabel(<span class="string">'Mean'</span>);
+
+figure
+x=0:1:100;
+posterior10 = prior.*binopdf(x,100,avgCP(10));
+plot(posterior10)
+title(<span class="string">'Binomial Posterior After 10 Samples'</span>);
+ylabel(<span class="string">'Likelihood'</span>);
+xlabel(<span class="string">'Mean'</span>);
+
+figure
+x=0:1:100;
+posterior50 = prior.*binopdf(x,100,avgCP(50));
+plot(posterior50)
+title(<span class="string">'Binomial Posterior After 50 Samples'</span>);
+ylabel(<span class="string">'Likelihood'</span>);
+xlabel(<span class="string">'Mean'</span>);
+
+figure
+likelihood = binopdf(x,100,avgCP(m));
+posteriorM = prior.*likelihood;
+plot(posteriorM)
+title(<span class="string">'Binomial Final Posterior'</span>);
+ylabel(<span class="string">'Likelihood'</span>);
+xlabel(<span class="string">'Mean'</span>);
+
+figure
+plot(mseCP)
+title(<span class="string">'Binomial Error Using CP'</span>);
+ylabel(<span class="string">'Mean Square Error'</span>);
+xlabel(<span class="string">'Number of Measurements'</span>);
+
+figure
+plot(mseML)
+title(<span class="string">'Binomial Error Using ML'</span>);
+ylabel(<span class="string">'Mean Square Error'</span>);
+xlabel(<span class="string">'Number of Measurements'</span>);
+
+<span class="comment">%%Part 2 - Gaussian Random Variable</span>
+<span class="comment">%Set mu and sigma to generate data</span>
+mu = 50;
+sigma = 5;
+n = 1;
+m = 100;
+
+mseML2 = zeros(n,m);
+mseCP2 = zeros(n,m);
+iterations = 100;
+
+<span class="comment">%hyperparameters</span>
+<span class="comment">%Good Guess</span>
+sigmaN = 6;
+mu0 = 40;
+sigma0 = 6;
+<span class="comment">%{
+</span><span class="comment">Bad Guess
+</span><span class="comment">sigmaN = 6;
+</span><span class="comment">mu0 = 10;
+</span><span class="comment">sigma0 = 20;
+</span><span class="comment">%}
+</span>x=0:1:100;
+prior2 = normpdf(x,mu0,sigma0);
+figure
+plot(prior2)
+title(<span class="string">'Gaussian Conjugate Prior'</span>);
+ylabel(<span class="string">'Likelihood'</span>);
+xlabel(<span class="string">'Mean'</span>);
+
+<span class="keyword">for</span> i = 1:iterations
+    <span class="comment">%generate random variables from normal distribution.</span>
+    zg = normrnd(mu,sigma,[n,m]);
+
+    avgML2 = ones(n,m);
+    avgCP2 = ones(n,m);
+    <span class="keyword">for</span> j = 1:m
+        <span class="comment">%Maximum Likelihood</span>
+        <span class="keyword">if</span> j ~= 1
+            avgML2(j) = (avgML2(j-1)*(j-1)+zg(j))/j;
+        <span class="keyword">else</span>
+            avgML2(j) = zg(j);
+        <span class="keyword">end</span>
+        <span class="comment">%avgML(j2) = mean(z2(1:j2));</span>
+
+        <span class="comment">%Conjugate Prior</span>
+        <span class="comment">%N is the number of data points so it should equal j?</span>
+        N = j;
+        avgCP2(j) = ((mu0*sigmaN)+(N*sigma0*avgML2(j)))/(N*sigma0+sigmaN);
+    <span class="keyword">end</span>
+    seML2 = (mu-avgML2).^2;
+    mseML2 = mseML2 + seML2;
+
+    seCP2 = (mu-avgCP2).^2;
+    mseCP2 = mseCP2 + seCP2;
+<span class="keyword">end</span>
+
+mseML2 = mseML2./iterations;
+mseCP2 = mseCP2./iterations;
+
+<span class="comment">%For the posteriod use equation 2.142 from the textbook and rearrange</span>
+<span class="comment">%variables</span>
+figure
+x = 0:1:100;
+N = 1;
+posterior1 = normpdf(x,avgCP2(1),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
+plot(posterior1)
+title(<span class="string">'Gaussian Posterior After 1 Sample'</span>);
+ylabel(<span class="string">'Likelihood'</span>);
+xlabel(<span class="string">'Mean'</span>);
+
+figure
+N = 10;
+posterior10 = normpdf(x,avgCP2(10),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
+plot(posterior10)
+title(<span class="string">'Gaussian Posterior After 10 Samples'</span>);
+ylabel(<span class="string">'Likelihood'</span>);
+xlabel(<span class="string">'Mean'</span>);
+
+figure
+N = 50;
+posterior50 = normpdf(x,avgCP2(50),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
+plot(posterior50)
+title(<span class="string">'Gaussian Posterior After 50 Samples'</span>);
+ylabel(<span class="string">'Likelihood'</span>);
+xlabel(<span class="string">'Mean'</span>);
+
+figure
+N = m;
+posteriorM = normpdf(x,avgCP2(m),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
+plot(posteriorM)
+title(<span class="string">'Gaussian Final Posterior'</span>);
+ylabel(<span class="string">'Likelihood'</span>);
+xlabel(<span class="string">'Mean'</span>);
+
+figure
+plot(mseCP2)
+title(<span class="string">'Gaussian Error Using CP'</span>);
+ylabel(<span class="string">'Mean Square Error'</span>);
+xlabel(<span class="string">'Number of Measurements'</span>);
+
+figure
+plot(mseML2)
+title(<span class="string">'Gaussian Error Using ML'</span>);
+ylabel(<span class="string">'Mean Square Error'</span>);
+xlabel(<span class="string">'Number of Measurements'</span>);
+</pre><img vspace="5" hspace="5" src="MiniMatlab1_01.png" alt=""> <img vspace="5" hspace="5" src="MiniMatlab1_02.png" alt=""> <img vspace="5" hspace="5" src="MiniMatlab1_03.png" alt=""> <img vspace="5" hspace="5" src="MiniMatlab1_04.png" alt=""> <img vspace="5" hspace="5" src="MiniMatlab1_05.png" alt=""> <img vspace="5" hspace="5" src="MiniMatlab1_06.png" alt=""> <img vspace="5" hspace="5" src="MiniMatlab1_07.png" alt=""> <img vspace="5" hspace="5" src="MiniMatlab1_08.png" alt=""> <img vspace="5" hspace="5" src="MiniMatlab1_09.png" alt=""> <img vspace="5" hspace="5" src="MiniMatlab1_10.png" alt=""> <img vspace="5" hspace="5" src="MiniMatlab1_11.png" alt=""> <img vspace="5" hspace="5" src="MiniMatlab1_12.png" alt=""> <img vspace="5" hspace="5" src="MiniMatlab1_13.png" alt=""> <img vspace="5" hspace="5" src="MiniMatlab1_14.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+close all;
+clear all;
+clc;
+
+%%Part 1 - Binomial Random Variables 
+
+N = 1;    %number of trials
+p = 0.5;  %probability of success
+n = 1;
+m = 1000;
+
+%MSE will take in the square errors from each iteration and find the
+%average
+mseML = zeros(n,m);
+mseCP = zeros(n,m);
+iterations = 100;
+
+%hyperparameters if a and b are both 0, cp would work the same as ml
+%Good Guess
+a = 3;
+b = 3;
+%{
+Bad Guess
+a = 10
+b = 3
+%}
+
+x=0:0.01:1;
+prior = betapdf(x,a,b);
+figure
+plot(prior)
+title('Binomial Conjugate Prior');
+ylabel('Likelihood');
+xlabel('Number of Measurements');
+
+for i = 1:iterations
+    %generate random variables from binomial distribution.
+    z = binornd(N,p,[n,m]);
+    %create variable to count number of ones
+    num1 = 0;
+    %create empty arrays that would give the mean of the numbers until the current
+    %number(for ML) or the mean using the formula(for CP)
+    %indexj 1 2  3   4  5
+    %     z 0 0  1   1  0
+    % avgML 0 0 .33 .5 .4
+    avgML = ones(n,m);
+    avgCP = ones(n,m);
+    for j = 1:m
+        %See if the number is a one
+        if z(j) == 1
+            num1 = num1 + 1;
+        end
+        %Maximum Likelihood
+        if j ~= 1
+            avgML(j) = (avgML(j-1)*(j-1)+z(j))/j;
+        else
+            avgML(j) = z(j);
+        end
+        %THIS IS A FASTER WAY BUT I FIGURED IT OUT LATER
+        %avgML(j) = mean(z(1:j));
+        %Conjugate Prior
+        avgCP(j) = (num1+a)/(j+a+b);
+    end
+    %create an array that keeps track of the square of the difference 
+    ...of each element and the real average. the average should get close to the real average 
+    seML = (N*p-avgML).^2; %.^ takes each element from avgML and squares it. without the '.' , the matrix would multiply itself
+    mseML = mseML + seML;
+    
+    seCP = (N*p-avgCP).^2;
+    mseCP = mseCP + seCP;
+end
+
+%divide each element by the number of iterations to get the mean square
+%error
+mseML = mseML./iterations;
+mseCP = mseCP./iterations;
+
+%Integrate the plotting posteriors into the for loop
+figure
+x=0:1:100;
+posterior1 = prior.*binopdf(x,100,avgCP(1));
+plot(posterior1)
+title('Binomial Posterior After 1 Sample');
+ylabel('Likelihood');
+xlabel('Mean');
+
+figure
+x=0:1:100;
+posterior10 = prior.*binopdf(x,100,avgCP(10));
+plot(posterior10)
+title('Binomial Posterior After 10 Samples');
+ylabel('Likelihood');
+xlabel('Mean');
+
+figure
+x=0:1:100;
+posterior50 = prior.*binopdf(x,100,avgCP(50));
+plot(posterior50)
+title('Binomial Posterior After 50 Samples');
+ylabel('Likelihood');
+xlabel('Mean');
+
+figure
+likelihood = binopdf(x,100,avgCP(m));
+posteriorM = prior.*likelihood;
+plot(posteriorM)
+title('Binomial Final Posterior');
+ylabel('Likelihood');
+xlabel('Mean');
+
+figure
+plot(mseCP)
+title('Binomial Error Using CP');
+ylabel('Mean Square Error');
+xlabel('Number of Measurements');
+
+figure
+plot(mseML)
+title('Binomial Error Using ML');
+ylabel('Mean Square Error');
+xlabel('Number of Measurements');
+
+%%Part 2 - Gaussian Random Variable
+%Set mu and sigma to generate data
+mu = 50;
+sigma = 5;
+n = 1;
+m = 100; 
+
+mseML2 = zeros(n,m);
+mseCP2 = zeros(n,m);
+iterations = 100;
+
+%hyperparameters
+%Good Guess
+sigmaN = 6;
+mu0 = 40;
+sigma0 = 6;
+%{ 
+Bad Guess
+sigmaN = 6;
+mu0 = 10;
+sigma0 = 20;
+%}
+x=0:1:100;
+prior2 = normpdf(x,mu0,sigma0);
+figure
+plot(prior2)
+title('Gaussian Conjugate Prior');
+ylabel('Likelihood');
+xlabel('Mean');
+
+for i = 1:iterations
+    %generate random variables from normal distribution.
+    zg = normrnd(mu,sigma,[n,m]);
+    
+    avgML2 = ones(n,m);
+    avgCP2 = ones(n,m);
+    for j = 1:m
+        %Maximum Likelihood
+        if j ~= 1
+            avgML2(j) = (avgML2(j-1)*(j-1)+zg(j))/j;
+        else
+            avgML2(j) = zg(j);
+        end
+        %avgML(j2) = mean(z2(1:j2));
+        
+        %Conjugate Prior
+        %N is the number of data points so it should equal j?
+        N = j;
+        avgCP2(j) = ((mu0*sigmaN)+(N*sigma0*avgML2(j)))/(N*sigma0+sigmaN);        
+    end
+    seML2 = (mu-avgML2).^2;
+    mseML2 = mseML2 + seML2;
+    
+    seCP2 = (mu-avgCP2).^2;
+    mseCP2 = mseCP2 + seCP2;
+end
+
+mseML2 = mseML2./iterations;
+mseCP2 = mseCP2./iterations;
+
+%For the posteriod use equation 2.142 from the textbook and rearrange
+%variables
+figure
+x = 0:1:100;
+N = 1;
+posterior1 = normpdf(x,avgCP2(1),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
+plot(posterior1)
+title('Gaussian Posterior After 1 Sample');
+ylabel('Likelihood');
+xlabel('Mean');
+
+figure
+N = 10;
+posterior10 = normpdf(x,avgCP2(10),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
+plot(posterior10)
+title('Gaussian Posterior After 10 Samples');
+ylabel('Likelihood');
+xlabel('Mean');
+
+figure
+N = 50;
+posterior50 = normpdf(x,avgCP2(50),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
+plot(posterior50)
+title('Gaussian Posterior After 50 Samples');
+ylabel('Likelihood');
+xlabel('Mean');
+
+figure
+N = m;
+posteriorM = normpdf(x,avgCP2(m),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
+plot(posteriorM)
+title('Gaussian Final Posterior');
+ylabel('Likelihood');
+xlabel('Mean');
+
+figure
+plot(mseCP2)
+title('Gaussian Error Using CP');
+ylabel('Mean Square Error');
+xlabel('Number of Measurements');
+
+figure
+plot(mseML2)
+title('Gaussian Error Using ML');
+ylabel('Mean Square Error');
+xlabel('Number of Measurements');
+
+##### SOURCE END #####
+--></body></html>
