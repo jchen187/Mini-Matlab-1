@@ -120,7 +120,7 @@ title('Binomial Error Using ML');
 ylabel('Mean Square Error');
 xlabel('Number of Measurements');
 
-%%Part 2 - Gaussian Random Variable
+%%Part 2 - Gaussian Random current variable
 %Set mu and sigma to generate data
 mu = 50;
 sigma = 5;
