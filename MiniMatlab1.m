@@ -15,7 +15,7 @@ mseML = zeros(n,m);
 mseCP = zeros(n,m);
 iterations = 100;
 
-%hyperparameters if a and b are both 0, cp would work the same as ml
+%Prior hyperparameters - if a and b are both 0, cp would work the same as ml
 %Good Guess
 a = 3;
 b = 3;
@@ -78,6 +78,7 @@ mseCP = mseCP./iterations;
 %Integrate the plotting posteriors into the for loop
 figure
 x=0:1:100;
+%the posterior is the prior times the liklihood
 posterior1 = prior.*binopdf(x,100,avgCP(1));
 plot(posterior1)
 title('Binomial Posterior After 1 Sample');
