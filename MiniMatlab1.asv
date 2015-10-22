@@ -256,11 +256,11 @@ Bad Guess
 x=0:1:100;
 x,mu,sigma
 %the conjugate prior for this liklihood is a normal inverse gamma
-part1 = sqrt(lambda)./(sigma.*sqrt(2*pi));
-part2 = (beta.^alpha)./gamma(alpha);
-part3 = (1./(sigma.^2)).^(alpha+1);
-part4 = exp((-2.*beta+lambda.*(x-mu0)^2)./(2.*sigma^2));
-prior2 = part1 * part2 * part3 * part4;
+part1 = sqrt(lambda)/(sigma*sqrt(2*pi));
+part2 = (beta^alpha)/gamma(alpha)
+part3 = (1/(sigma^2))^(alpha+1)
+part4 = exp((-2*beta+lambda*(x-mu)^2)/(2*sigma
+prior2 = 
 figure
 plot(prior2)
 title('Gaussian Prior');
