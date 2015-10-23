@@ -257,10 +257,10 @@ part1 = (beta.^alpha).*sqrt(lambda)./(gamma(alpha).*sqrt(2.*pi));
 part2 = t.^gamma(alpha-0.5);
 part3 = exp(-beta.*t);
 part4 = exp((-lambda*t.*(x-mu0).^2)./2);
-prior2 = part1.*part2.*part3.*part4;
+prior = part1.*part2.*part3.*part4;
 
 figure
-mesh(x,t,prior2)
+mesh(x,t,prior)
 title('Gaussian Prior');
 zlabel('Likelihood');
 xlabel('Mean');
@@ -270,28 +270,46 @@ ylabel('T')
 %both contain 100 elements
 n = 1;
 m = 100;
-mseML2 = zeros(n,m);
-mseCP2 = zeros(n,m);
+mseML = zeros(n,m);
+mseCP = zeros(n,m);
 
 iterations = 100;
+%Which Ones Do I want to Print
+indexPrint = [1,10,50,100];
 for i = 1:iterations
         %generate random variables from normal distribution.
     zg = normrnd(mu,sigma,[n,m]);
     
     %create an array the same size as zg. they will contain the average of
     %all the previous numbers including itself for this ONE iteration
-    avgML2 = ones(n,m);
-    avgCP2 = ones(n,m);
+    avgML = ones(n,m);
+    avgCP = ones(n,m);
     for j = 1:m
         %Maximum Likelihood
-        avgML2(j) = mean(zg(1:j)); 
+        avgML(j) = mean(zg(1:j)); 
         
         %Posterior Hyperparameters
-        mu0_NEW = (lambda*mu0+j*avgML2(j))/(lambda+j);
+        mu0_NEW = (lambda*mu0+j*avgML(j))/(lambda+j);
         lambda_NEW = lambda+j; % number of observations
         alpha_NEW = alpha+j/2; 
-        beta_NEW = beta+0.5*sum(zg(1:j)-avgML2(j))+((j*lambda)/(j+lambda))*((avgML2(j)-mu0)^2)/2;
-        avgCP2(j) = mu0_NEW;
+        beta_NEW = beta+0.5*sum(zg(1:j)-avgML(j))+((j*lambda)/(j+lambda))*((avgML(j)-mu0)^2)/2;
+        avgCP(j) = mu0_NEW;
+        
+        if (i==1 && isMember(j,indexPrint))
+            likelihood = normpdf(x,mu0_NEW,beta_NEW/alpha_NEW);
+            part1 = (beta_NEW.^alpha_NEW).*sqrt(lambda_NEW)./(gamma(alpha_NEW).*sqrt(2.*pi));
+            part2 = t.^gamma(alpha_NEW-0.5);
+            part3 = exp(-beta_NEW.*t);
+            part4 = exp((-lambda_NEW*t.*(x-mu0_NEW).^2)./2);
+            prior = part1.*part2.*part3.*part4; 
+            posterior = prior.*likelihood;
+            figure
+            mesh(x,t,posterior);
+            title(strcat('Gaussian Posterior After ',num2str(j),' Samples'));
+            zlabel('Likelihood');
+            xlabel('Mean');
+            ylabel('T');
+        end
     end
     
     %create an array that stores the square error for this ONE iteration
@@ -314,26 +332,11 @@ ylabel('Mean Square Error');
 xlabel('Number of Measurements');
 
 figure
-x = 0:1:100;
-N = 1;
-posterior1 = normpdf(x,avgCP2(1),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
-plot(posterior1)
-title('Gaussian Posterior After 1 Sample');
-ylabel('Likelihood');
-xlabel('Mean');
-
-figure
-N = 10;
-posterior10 = normpdf(x,avgCP2(10),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
-plot(posterior10)
-title('Gaussian Posterior After 10 Samples');
-ylabel('Likelihood');
-xlabel('Mean');
-
-figure
 plot(mseCP2)
 title('Gaussian Error Using CP');
 ylabel('Mean Square Error');
 xlabel('Number of Measurements');
+
+
 
 

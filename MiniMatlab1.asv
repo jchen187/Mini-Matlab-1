@@ -274,8 +274,41 @@ mseML2 = zeros(n,m);
 mseCP2 = zeros(n,m);
 
 iterations = 100;
+%Which Ones Do I want to Print
+indexPrint = [1,10,50,100];
 for i = 1:iterations
+        %generate random variables from normal distribution.
+    zg = normrnd(mu,sigma,[n,m]);
     
+    %create an array the same size as zg. they will contain the average of
+    %all the previous numbers including itself for this ONE iteration
+    avgML2 = ones(n,m);
+    avgCP2 = ones(n,m);
+    for j = 1:m
+        %Maximum Likelihood
+        avgML2(j) = mean(zg(1:j)); 
+        
+        %Posterior Hyperparameters
+        mu0_NEW = (lambda*mu0+j*avgML2(j))/(lambda+j);
+        lambda_NEW = lambda+j; % number of observations
+        alpha_NEW = alpha+j/2; 
+        beta_NEW = beta+0.5*sum(zg(1:j)-avgML2(j))+((j*lambda)/(j+lambda))*((avgML2(j)-mu0)^2)/2;
+        avgCP2(j) = mu0_NEW;
+        
+        if (i==1 & isMember(j,indexPrint))
+            figure
+            mesh(x,t,posterior);
+            title('Gaussian Posterior
+        end
+    end
+    
+    %create an array that stores the square error for this ONE iteration
+    seML2 = (mu-avgML2).^2;
+    %add up all square errors for ALL iterations
+    mseML2 = mseML2 + seML2;
+      
+    seCP2 = (mu-avgCP2).^2;
+    mseCP2 = mseCP2 + seCP2;
 end
 
 %We have to divide by iterations to get the mean error for each 
@@ -305,10 +338,6 @@ title('Gaussian Posterior After 10 Samples');
 ylabel('Likelihood');
 xlabel('Mean');
 
-figure
-plot(mseCP2)
-title('Gaussian Error Using CP');
-ylabel('Mean Square Error');
-xlabel('Number of Measurements');
+
 
 
