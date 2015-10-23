@@ -252,8 +252,8 @@ iterations = 100;
     %Good Guess
 mu0 = 40;
 lambda = 5; % number of observations
-alpha = 3; 
-beta = 15; 
+alpha = 5; 
+beta = 20; 
 %{ 
 Bad Guess
 %}
@@ -277,31 +277,27 @@ for i = 1:iterations
     %generate random variables from normal distribution.
     zg = normrnd(mu,sigma,[n,m]);
     
+    %create an array the same size as zg
     avgML2 = ones(n,m);
-    avgCP2 = ones(n,m);
     for j = 1:m
         %Maximum Likelihood
-        if j ~= 1
-            avgML2(j) = (avgML2(j-1)*(j-1)+zg(j))/j;
-        else
-            avgML2(j) = zg(j);
-        end
-        %avgML(j2) = mean(z2(1:j2));
-        
-        %Conjugate Prior
-        %N is the number of data points so it should equal j?
-        N = j;
-        avgCP2(j) = ((mu0*sigmaN)+(N*sigma0*avgML2(j)))/(N*sigma0+sigmaN);        
+        avgML2(j) = mean(zg(1:j)); 
     end
+    %create an array that stores the square error
     seML2 = (mu-avgML2).^2;
-    mseML2 = mseML2 + seML2;
     
-    seCP2 = (mu-avgCP2).^2;
-    mseCP2 = mseCP2 + seCP2;
+    %add up all square errors
+    mseML2 = mseML2 + seML2;
 end
 
 mseML2 = mseML2./iterations;
-mseCP2 = mseCP2./iterations;
+
+
+figure
+plot(mseML2)
+title('Gaussian Error Using ML');
+ylabel('Mean Square Error');
+xlabel('Number of Measurements');
 
 figure
 x = 0:1:100;
@@ -326,9 +322,4 @@ title('Gaussian Error Using CP');
 ylabel('Mean Square Error');
 xlabel('Number of Measurements');
 
-figure
-plot(mseML2)
-title('Gaussian Error Using ML');
-ylabel('Mean Square Error');
-xlabel('Number of Measurements');
 
