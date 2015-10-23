@@ -237,27 +237,19 @@ xlabel('Number of Measurements');
 %We have a liklihood that is a normal distribution with unknown mean and variance
 %model parameters = mu and t(precision)
 
-%Set mu and sigma to generate data
+%Set mu and sigma of the right distribution
 mu = 50;
 sigma = 5;
-n = 1;
-m = 100; 
 %we could create a pdf 
 
-mseML2 = zeros(n,m);
-mseCP2 = zeros(n,m);
-iterations = 100;
-
-%hyperparameters
-    %Good Guess
+%set hyperparameters for prior
+%Good Guess
 mu0 = 40;
 lambda = 5; % number of observations
 alpha = 5; 
 beta = 20; 
-%{ 
-Bad Guess
-%}
 
+%x and t are the supports(where the bounds are?)
 [x,t] = meshgrid(0:1:100, 0:0.1:2);
 
 %the conjugate prior for this liklihood is a normal inverse gamma
@@ -266,6 +258,7 @@ part2 = t.^gamma(alpha-0.5);
 part3 = exp(-beta.*t);
 part4 = exp((-lambda*t.*(x-mu0).^2)./2);
 prior2 = part1.*part2.*part3.*part4;
+
 figure
 mesh(x,t,prior2)
 title('Gaussian Prior');
@@ -273,25 +266,41 @@ zlabel('Likelihood');
 xlabel('Mean');
 ylabel('T')
 
+%We will eventually have the mean square error in these two arrays, one from maximum liklihood and one from conjugate priors They
+%both contain 100 elements
+n = 1;
+m = 100;
+mseML2 = zeros(n,m);
+mseCP2 = zeros(n,m);
+
+iterations = 100;
 for i = 1:iterations
     %generate random variables from normal distribution.
     zg = normrnd(mu,sigma,[n,m]);
     
-    %create an array the same size as zg
+    %create an array the same size as zg. they will contain the average of
+    %all the previous numbers including itself for this ONE iteration
     avgML2 = ones(n,m);
+    avgCP2 = ones(n,m);
     for j = 1:m
         %Maximum Likelihood
         avgML2(j) = mean(zg(1:j)); 
+        
+        avgCP2(j);
     end
-    %create an array that stores the square error
-    seML2 = (mu-avgML2).^2;
     
-    %add up all square errors
+    %create an array that stores the square error for this ONE iteration
+    seML2 = (mu-avgML2).^2;
+    %add up all square errors for ALL iterations
     mseML2 = mseML2 + seML2;
+      
+    seCP2 = (mu-avgCP2).^2;
+    mseCP2 = mseCP2 + seCP2;
 end
 
+%We have to divide by iterations to get the mean error for each 
 mseML2 = mseML2./iterations;
-
+mseCP2 = mseCP2./iterations;
 
 figure
 plot(mseML2)
