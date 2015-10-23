@@ -275,7 +275,7 @@ mseCP2 = zeros(n,m);
 
 iterations = 100;
 for i = 1:iterations
-    %generate random variables from normal distribution.
+        %generate random variables from normal distribution.
     zg = normrnd(mu,sigma,[n,m]);
     
     %create an array the same size as zg. they will contain the average of
@@ -286,7 +286,12 @@ for i = 1:iterations
         %Maximum Likelihood
         avgML2(j) = mean(zg(1:j)); 
         
-        avgCP2(j);
+        %Posterior Hyperparameters
+        mu0_NEW = (lambda*mu0+j*avgML2(j))/(lambda+j);
+        lambda_NEW = lambda+j; % number of observations
+        alpha_NEW = alpha+j/2; 
+        beta_NEW = beta+0.5*sum(zg(1:j)-avgML2(j))+((j*lambda)/(j+lambda))*((avgML2(j)-mu0)^2)/2;
+        avgCP2(j) = mu0_NEW;
     end
     
     %create an array that stores the square error for this ONE iteration

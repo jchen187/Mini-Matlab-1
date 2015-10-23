@@ -237,75 +237,57 @@ xlabel('Number of Measurements');
 %We have a liklihood that is a normal distribution with unknown mean and variance
 %model parameters = mu and t(precision)
 
-%Set mu and sigma to generate data
+%Set mu and sigma of the right distribution
 mu = 50;
 sigma = 5;
-n = 1;
-m = 100; 
 %we could create a pdf 
 
-mseML2 = zeros(n,m);
-mseCP2 = zeros(n,m);
-iterations = 100;
-
-%hyperparameters
-    %Good Guess
+%set hyperparameters for prior
+%Good Guess
 mu0 = 40;
 lambda = 5; % number of observations
-alpha = 3; % alpha
-beta = 15; % beta precision
-%{ 
-Bad Guess
-%}
+alpha = 5; 
+beta = 20; 
 
-[x, t] = meshgrid(0:1:100, 0:0.1:2);
-sigma0 = sqrt(t);
+%x and t are the supports(where the bounds are?)
+[x,t] = meshgrid(0:1:100, 0:0.1:2);
 
 %the conjugate prior for this liklihood is a normal inverse gamma
-part1 = (beta.^alpha)*sqrt(lambda)./(gamma(alpha).*sqrt(2*pi));
-part2 = t^gamma(alpha-0.5);
-part3 = exp(-1.*beta.*t);
-part4 = exp((-1.*beta*t.*(x-mu0)^2)./2);
-prior2 = part1 * part2 * part3 * part4;
+part1 = (beta.^alpha).*sqrt(lambda)./(gamma(alpha).*sqrt(2.*pi));
+part2 = t.^gamma(alpha-0.5);
+part3 = exp(-beta.*t);
+part4 = exp((-lambda*t.*(x-mu0).^2)./2);
+prior2 = part1.*part2.*part3.*part4;
+
 figure
-meshgrid(prior2)
+mesh(x,t,prior2)
 title('Gaussian Prior');
 zlabel('Likelihood');
 xlabel('Mean');
-ylabel('Sigma^2')
+ylabel('T')
 
+%We will eventually have the mean square error in these two arrays, one from maximum liklihood and one from conjugate priors They
+%both contain 100 elements
+n = 1;
+m = 100;
+mseML2 = zeros(n,m);
+mseCP2 = zeros(n,m);
+
+iterations = 100;
 for i = 1:iterations
-    %generate random variables from normal distribution.
-    zg = normrnd(mu,sigma,[n,m]);
     
-    avgML2 = ones(n,m);
-    avgCP2 = ones(n,m);
-    for j = 1:m
-        %Maximum Likelihood
-        if j ~= 1
-            avgML2(j) = (avgML2(j-1)*(j-1)+zg(j))/j;
-        else
-            avgML2(j) = zg(j);
-        end
-        %avgML(j2) = mean(z2(1:j2));
-        
-        %Conjugate Prior
-        %N is the number of data points so it should equal j?
-        N = j;
-        avgCP2(j) = ((mu0*sigmaN)+(N*sigma0*avgML2(j)))/(N*sigma0+sigmaN);        
-    end
-    seML2 = (mu-avgML2).^2;
-    mseML2 = mseML2 + seML2;
-    
-    seCP2 = (mu-avgCP2).^2;
-    mseCP2 = mseCP2 + seCP2;
 end
 
+%We have to divide by iterations to get the mean error for each 
 mseML2 = mseML2./iterations;
 mseCP2 = mseCP2./iterations;
 
-%For the posteriod use equation 2.142 from the textbook and rearrange
-%variables
+figure
+plot(mseML2)
+title('Gaussian Error Using ML');
+ylabel('Mean Square Error');
+xlabel('Number of Measurements');
+
 figure
 x = 0:1:100;
 N = 1;
@@ -324,30 +306,9 @@ ylabel('Likelihood');
 xlabel('Mean');
 
 figure
-N = 50;
-posterior50 = normpdf(x,avgCP2(50),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
-plot(posterior50)
-title('Gaussian Posterior After 50 Samples');
-ylabel('Likelihood');
-xlabel('Mean');
-
-figure
-N = m;
-posteriorM = normpdf(x,avgCP2(m),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
-plot(posteriorM)
-title('Gaussian Final Posterior');
-ylabel('Likelihood');
-xlabel('Mean');
-
-figure
 plot(mseCP2)
 title('Gaussian Error Using CP');
 ylabel('Mean Square Error');
 xlabel('Number of Measurements');
 
-figure
-plot(mseML2)
-title('Gaussian Error Using ML');
-ylabel('Mean Square Error');
-xlabel('Number of Measurements');
 
