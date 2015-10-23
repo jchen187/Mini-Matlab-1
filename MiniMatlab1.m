@@ -229,43 +229,50 @@ xlabel('Number of Measurements');
 % ylabel('Mean Square Error');
 % xlabel('Number of Measurements');
 
+
+
+
+
 %%Part 2 - Gaussian Random Variable
 %We have a liklihood that is a normal distribution with unknown mean and variance
-%model parameters = mu and sigma
+%model parameters = mu and t(precision)
 
 %Set mu and sigma to generate data
 mu = 50;
 sigma = 5;
 n = 1;
 m = 100; 
+%we could create a pdf 
 
 mseML2 = zeros(n,m);
 mseCP2 = zeros(n,m);
 iterations = 100;
 
 %hyperparameters
-%Good Guess
+    %Good Guess
 mu0 = 40;
 lambda = 5; % number of observations
-alpha = 3; % alpha
-beta = 15; % beta
+alpha = 3; 
+beta = 15; 
 %{ 
 Bad Guess
 %}
 
-x=0:1:100;
-x,mu,sigma
+[x,t] = meshgrid(0:1:100, 0:0.1:2);
+sigma0 = sqrt(t);
+
 %the conjugate prior for this liklihood is a normal inverse gamma
-part1 = sqrt(lambda)./(sigma.*sqrt(2*pi));
-part2 = (beta.^alpha)./gamma(alpha);
-part3 = (1./(sigma.^2)).^(alpha+1);
-part4 = exp((-2.*beta+lambda.*(x-mu0)^2)./(2.*sigma^2));
-prior2 = part1 * part2 * part3 * part4;
+part1 = (beta.^alpha)*sqrt(lambda)./(gamma(alpha).*sqrt(2*pi));
+part2 = t.^gamma(alpha-0.5);
+part3 = exp(-1.*beta.*t);
+part4 = exp((-1.*lambda*t.*(x-mu0)^2)./2);
+prior2 = part1.*part2.*part3.*part4;
 figure
-plot(prior2)
+meshgrid(prior2)
 title('Gaussian Prior');
-ylabel('Likelihood');
+zlabel('Likelihood');
 xlabel('Mean');
+ylabel('Sigma^2')
 
 for i = 1:iterations
     %generate random variables from normal distribution.
