@@ -259,20 +259,19 @@ Bad Guess
 %}
 
 [x,t] = meshgrid(0:1:100, 0:0.1:2);
-sigma0 = sqrt(t);
 
 %the conjugate prior for this liklihood is a normal inverse gamma
-part1 = (beta.^alpha)*sqrt(lambda)./(gamma(alpha).*sqrt(2*pi));
+part1 = (beta.^alpha).*sqrt(lambda)./(gamma(alpha).*sqrt(2.*pi));
 part2 = t.^gamma(alpha-0.5);
-part3 = exp(-1.*beta.*t);
-part4 = exp((-1.*lambda*t.*(x-mu0)^2)./2);
+part3 = exp(-beta.*t);
+part4 = exp((-lambda*t.*(x-mu0).^2)./2);
 prior2 = part1.*part2.*part3.*part4;
 figure
-meshgrid(prior2)
+mesh(x,t,prior2)
 title('Gaussian Prior');
 zlabel('Likelihood');
 xlabel('Mean');
-ylabel('Sigma^2')
+ylabel('T')
 
 for i = 1:iterations
     %generate random variables from normal distribution.
@@ -304,8 +303,6 @@ end
 mseML2 = mseML2./iterations;
 mseCP2 = mseCP2./iterations;
 
-%For the posteriod use equation 2.142 from the textbook and rearrange
-%variables
 figure
 x = 0:1:100;
 N = 1;
@@ -320,22 +317,6 @@ N = 10;
 posterior10 = normpdf(x,avgCP2(10),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
 plot(posterior10)
 title('Gaussian Posterior After 10 Samples');
-ylabel('Likelihood');
-xlabel('Mean');
-
-figure
-N = 50;
-posterior50 = normpdf(x,avgCP2(50),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
-plot(posterior50)
-title('Gaussian Posterior After 50 Samples');
-ylabel('Likelihood');
-xlabel('Mean');
-
-figure
-N = m;
-posteriorM = normpdf(x,avgCP2(m),((sigmaN*sigma0)^2)/(sigmaN^2+ N*sigma0^2));
-plot(posteriorM)
-title('Gaussian Final Posterior');
 ylabel('Likelihood');
 xlabel('Mean');
 
